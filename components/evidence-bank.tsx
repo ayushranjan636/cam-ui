@@ -64,7 +64,7 @@ const evidenceItems = [
     duration: "00:04:10",
     size: "89.7 MB",
     type: "video",
-    thumbnail: "/placeholder.svg?height=200&width=300&text=Evidence+6",
+    thumbnail: "/438935871-1611137152_jpeg_jpg.rf.ac6840975d1418178f07cda91de41b28.jpg?height=200&width=300&text=Evidence+6",
   },
 ]
 
