@@ -4,7 +4,6 @@ export const mockCameras = [
     location: "Main Entrance",
     status: "live" as const,
     timestamp: "22:20:16",
-    image: "/placeholder.svg?height=300&width=400&text=Main+Entrance",
     detections: [],
     isWebcam: true, // This camera will use webcam
     fps: 30,
