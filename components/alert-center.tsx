@@ -134,7 +134,7 @@ export function AlertCenter({ alerts }: AlertCenterProps) {
                 {/* Alert Image/Preview */}
                 <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden border border-gray-700">
                   <img
-                    src="/placeholder.svg?height=300&width=500&text=Security+Camera+Feed"
+                    src="/1.jpeg?height=300&width=500&text=Security+Camera+Feed"
                     alt="Alert preview"
                     className="w-full h-full object-cover"
                   />
