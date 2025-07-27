@@ -18,22 +18,50 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("live-monitor")
   const { systemStats, alerts, cameras, isConnected } = useRealTimeData()
 
+  // State to track which cameras are enabled/disabled
+  const [cameraStates, setCameraStates] = useState<Record<string, boolean>>(() => {
+    const initialStates: Record<string, boolean> = {}
+    cameras.forEach((camera) => {
+      initialStates[camera.id] = camera.status !== "offline"
+    })
+    return initialStates
+  })
+
+  // Function to toggle camera on/off
+  const toggleCamera = (cameraId: string, enabled: boolean) => {
+    setCameraStates((prev) => ({
+      ...prev,
+      [cameraId]: enabled,
+    }))
+  }
+
+  // Function to get updated cameras with current states
+  const getUpdatedCameras = () => {
+    return cameras.map((camera) => ({
+      ...camera,
+      isEnabled: cameraStates[camera.id] ?? true,
+      status: cameraStates[camera.id] === false ? ("offline" as const) : camera.status,
+    }))
+  }
+
+  const updatedCameras = getUpdatedCameras()
+
   const renderContent = () => {
     switch (activeTab) {
       case "live-monitor":
-        return <LiveMonitor cameras={cameras} />
+        return <LiveMonitor cameras={updatedCameras} />
       case "alert-center":
         return <AlertCenter alerts={alerts} />
       case "evidence-bank":
         return <EvidenceBank />
       case "camera-health":
-        return <CameraHealth cameras={cameras} />
+        return <CameraHealth cameras={updatedCameras} onToggleCamera={toggleCamera} />
       case "ai-tuning":
         return <AITuning />
       case "analytics":
-        return <Analytics systemStats={systemStats} cameras={cameras} alerts={alerts} />
+        return <Analytics systemStats={systemStats} cameras={updatedCameras} alerts={alerts} />
       default:
-        return <LiveMonitor cameras={cameras} />
+        return <LiveMonitor cameras={updatedCameras} />
     }
   }
 
