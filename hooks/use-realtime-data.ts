@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react"
 
 interface SystemStats {
   totalCameras: number
@@ -10,7 +9,7 @@ interface SystemStats {
   offlineCameras: number
   peopleDetected: number
   bagsDetected: number
-  activeAlerts: number
+  alertsCount: number
   systemHealth: number
   cpuUsage: number
   memoryUsage: number
@@ -18,14 +17,15 @@ interface SystemStats {
   uptime: string
 }
 
-interface Detection {
+interface Alert {
+  id: string
   type: string
-  confidence: number
-  x: number
-  y: number
-  width: number
-  height: number
+  message: string
+  location: string
   timestamp: string
+  status: "active" | "acknowledged"
+  confidence: number
+  priority: "high" | "medium" | "low"
 }
 
 interface Camera {
@@ -34,7 +34,7 @@ interface Camera {
   status: "live" | "warning" | "offline"
   timestamp: string
   image: string
-  detections: Detection[]
+  detections: any[]
   isWebcam?: boolean
   fps: number
   resolution: string
@@ -43,23 +43,7 @@ interface Camera {
   uptime: number
 }
 
-interface Alert {
-  id: string
-  priority: "HIGH" | "MEDIUM" | "LOW"
-  type: string
-  description: string
-  location: string
-  cameraId: string
-  timestamp: string
-  confidence: number
-  image: string
-  status: "active" | "acknowledged" | "resolved"
-  assignedTo?: string
-}
-
 export function useRealTimeData() {
-  const { toast } = useToast()
-  const [isConnected, setIsConnected] = useState(true)
   const [systemStats, setSystemStats] = useState<SystemStats>({
     totalCameras: 8,
     onlineCameras: 6,
@@ -67,25 +51,68 @@ export function useRealTimeData() {
     offlineCameras: 1,
     peopleDetected: 47,
     bagsDetected: 12,
-    activeAlerts: 4,
+    alertsCount: 4,
     systemHealth: 99.2,
     cpuUsage: 45,
     memoryUsage: 67,
     networkLatency: 12,
-    uptime: "7d 14h 32m",
+    uptime: "99.8%",
   })
+
+  const [alerts, setAlerts] = useState<Alert[]>([
+    {
+      id: "1",
+      type: "Person Detected",
+      message: "Unauthorized person detected in restricted area",
+      location: "Main Entrance",
+      timestamp: "18:35:44",
+      status: "active",
+      confidence: 96,
+      priority: "high",
+    },
+    {
+      id: "2",
+      type: "Suspicious Activity",
+      message: "Unusual movement pattern detected",
+      location: "Main Hallway",
+      timestamp: "18:35:44",
+      status: "active",
+      confidence: 87,
+      priority: "high",
+    },
+    {
+      id: "3",
+      type: "Restricted Area Breach",
+      message: "Person entered restricted zone",
+      location: "Parking Lot",
+      timestamp: "18:35:44",
+      status: "active",
+      confidence: 92,
+      priority: "high",
+    },
+    {
+      id: "4",
+      type: "Camera Fault",
+      message: "Camera connection unstable",
+      location: "Library",
+      timestamp: "18:35:44",
+      status: "active",
+      confidence: 78,
+      priority: "medium",
+    },
+  ])
 
   const [cameras, setCameras] = useState<Camera[]>([
     {
       id: "CAM_MAIN_01",
       location: "Main Entrance",
       status: "live",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Main+Entrance",
       detections: [],
       isWebcam: true,
       fps: 30,
-      resolution: "1920x1080",
+      resolution: "1080p",
       lastActivity: "2s ago",
       temperature: 42,
       uptime: 99.8,
@@ -94,269 +121,149 @@ export function useRealTimeData() {
       id: "CAM_LOBBY_02",
       location: "Reception Lobby",
       status: "live",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Reception+Lobby",
       detections: [],
       fps: 25,
-      resolution: "1280x720",
+      resolution: "720p",
       lastActivity: "1s ago",
       temperature: 38,
-      uptime: 99.5,
+      uptime: 98.5,
     },
     {
       id: "CAM_HALL_03",
       location: "Main Hallway",
       status: "live",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Main+Hallway",
       detections: [
         {
           type: "Person",
           confidence: 94,
-          x: 120,
-          y: 80,
-          width: 60,
+          x: 150,
+          y: 100,
+          width: 80,
           height: 120,
-          timestamp: new Date().toISOString(),
+          timestamp: "22:20:16",
         },
       ],
       fps: 30,
-      resolution: "1920x1080",
-      lastActivity: "now",
+      resolution: "1080p",
+      lastActivity: "3s ago",
       temperature: 41,
-      uptime: 99.9,
+      uptime: 99.2,
     },
     {
       id: "CAM_LAB_04",
       location: "Computer Lab",
       status: "warning",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Computer+Lab",
       detections: [],
-      fps: 15,
-      resolution: "1280x720",
+      fps: 20,
+      resolution: "720p",
       lastActivity: "5s ago",
-      temperature: 55,
-      uptime: 97.2,
+      temperature: 45,
+      uptime: 95.3,
     },
     {
       id: "CAM_PARK_05",
       location: "Parking Lot",
       status: "live",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Parking+Lot",
       detections: [
         {
-          type: "Vehicle",
-          confidence: 87,
+          type: "Person",
+          confidence: 89,
           x: 200,
           y: 150,
-          width: 100,
-          height: 60,
-          timestamp: new Date().toISOString(),
+          width: 70,
+          height: 110,
+          timestamp: "22:20:16",
         },
       ],
-      fps: 20,
-      resolution: "1920x1080",
-      lastActivity: "3s ago",
+      fps: 25,
+      resolution: "1080p",
+      lastActivity: "2s ago",
       temperature: 39,
-      uptime: 99.1,
+      uptime: 97.8,
     },
     {
       id: "CAM_CAFE_06",
       location: "Cafeteria",
       status: "live",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Cafeteria",
       detections: [],
-      fps: 25,
-      resolution: "1280x720",
-      lastActivity: "4s ago",
+      fps: 30,
+      resolution: "720p",
+      lastActivity: "1s ago",
       temperature: 43,
-      uptime: 98.8,
+      uptime: 99.1,
     },
     {
       id: "CAM_LIB_07",
       location: "Library",
       status: "offline",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Library",
       detections: [],
       fps: 0,
       resolution: "N/A",
-      lastActivity: "2m ago",
+      lastActivity: "5m ago",
       temperature: 0,
-      uptime: 85.3,
+      uptime: 0,
     },
     {
       id: "CAM_GYM_08",
       location: "Gymnasium",
       status: "live",
-      timestamp: new Date().toLocaleTimeString(),
-      image: "/placeholder.svg?height=200&width=300",
+      timestamp: "22:20:16",
+      image: "/placeholder.svg?height=300&width=400&text=Gymnasium",
       detections: [],
-      fps: 30,
-      resolution: "1920x1080",
-      lastActivity: "1s ago",
-      temperature: 44,
-      uptime: 99.7,
+      fps: 25,
+      resolution: "1080p",
+      lastActivity: "4s ago",
+      temperature: 40,
+      uptime: 98.7,
     },
   ])
 
-  const [alerts, setAlerts] = useState<Alert[]>([
-    {
-      id: "ALT_001",
-      priority: "HIGH",
-      type: "UNAUTHORIZED_ACCESS",
-      description: "Unauthorized person detected in restricted area",
-      location: "Main Entrance",
-      cameraId: "CAM_MAIN_01",
-      timestamp: new Date(Date.now() - 300000).toISOString(),
-      confidence: 96,
-      image: "/placeholder.svg?height=400&width=600",
-      status: "active",
-    },
-    {
-      id: "ALT_002",
-      priority: "HIGH",
-      type: "SUSPICIOUS_BEHAVIOR",
-      description: "Suspicious activity detected - loitering",
-      location: "Main Hallway",
-      cameraId: "CAM_HALL_03",
-      timestamp: new Date(Date.now() - 600000).toISOString(),
-      confidence: 87,
-      image: "/placeholder.svg?height=400&width=600",
-      status: "active",
-    },
-    {
-      id: "ALT_003",
-      priority: "MEDIUM",
-      type: "OBJECT_LEFT_BEHIND",
-      description: "Unattended bag detected",
-      location: "Parking Lot",
-      cameraId: "CAM_PARK_05",
-      timestamp: new Date(Date.now() - 900000).toISOString(),
-      confidence: 92,
-      image: "/placeholder.svg?height=400&width=600",
-      status: "acknowledged",
-    },
-    {
-      id: "ALT_004",
-      priority: "LOW",
-      type: "CAMERA_MALFUNCTION",
-      description: "Camera temperature above normal threshold",
-      location: "Computer Lab",
-      cameraId: "CAM_LAB_04",
-      timestamp: new Date(Date.now() - 1200000).toISOString(),
-      confidence: 100,
-      image: "/placeholder.svg?height=400&width=600",
-      status: "active",
-    },
-  ])
+  const [isConnected, setIsConnected] = useState(true)
 
   // Simulate real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
-      // Update timestamps
+      // Update timestamp
+      const now = new Date()
+      const timestamp = now.toLocaleTimeString("en-US", { hour12: false })
+
+      // Update cameras with new timestamp
       setCameras((prev) =>
         prev.map((camera) => ({
           ...camera,
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp,
         })),
       )
 
-      // Randomly update system stats
+      // Randomly update people detected count
       setSystemStats((prev) => ({
         ...prev,
-        peopleDetected: prev.peopleDetected + Math.floor(Math.random() * 3) - 1,
-        bagsDetected: prev.bagsDetected + Math.floor(Math.random() * 2) - 1,
-        cpuUsage: Math.max(20, Math.min(80, prev.cpuUsage + Math.floor(Math.random() * 10) - 5)),
-        memoryUsage: Math.max(30, Math.min(90, prev.memoryUsage + Math.floor(Math.random() * 8) - 4)),
-        networkLatency: Math.max(5, Math.min(50, prev.networkLatency + Math.floor(Math.random() * 6) - 3)),
+        peopleDetected: prev.peopleDetected + (Math.random() > 0.7 ? 1 : 0),
+        cpuUsage: Math.max(30, Math.min(80, prev.cpuUsage + (Math.random() - 0.5) * 10)),
+        memoryUsage: Math.max(50, Math.min(90, prev.memoryUsage + (Math.random() - 0.5) * 5)),
+        networkLatency: Math.max(5, Math.min(50, prev.networkLatency + (Math.random() - 0.5) * 5)),
       }))
-
-      // Simulate random detections
-      if (Math.random() < 0.3) {
-        setCameras((prev) =>
-          prev.map((camera) => {
-            if (camera.status === "live" && Math.random() < 0.2) {
-              const detectionTypes = ["Person", "Vehicle", "Bag", "Face"]
-              const randomType = detectionTypes[Math.floor(Math.random() * detectionTypes.length)]
-              return {
-                ...camera,
-                detections: [
-                  {
-                    type: randomType,
-                    confidence: Math.floor(Math.random() * 20) + 80,
-                    x: Math.floor(Math.random() * 200),
-                    y: Math.floor(Math.random() * 150),
-                    width: Math.floor(Math.random() * 80) + 40,
-                    height: Math.floor(Math.random() * 100) + 60,
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-                lastActivity: "now",
-              }
-            }
-            return camera
-          }),
-        )
-      }
-
-      // Simulate new alerts occasionally
-      if (Math.random() < 0.05) {
-        const newAlert: Alert = {
-          id: `ALT_${Date.now()}`,
-          priority: Math.random() < 0.3 ? "HIGH" : Math.random() < 0.6 ? "MEDIUM" : "LOW",
-          type: "MOTION_DETECTED",
-          description: "Motion detected in monitored area",
-          location: "Random Location",
-          cameraId: `CAM_${Math.floor(Math.random() * 8) + 1}`,
-          timestamp: new Date().toISOString(),
-          confidence: Math.floor(Math.random() * 20) + 80,
-          image: "/placeholder.svg?height=400&width=600",
-          status: "active",
-        }
-
-        setAlerts((prev) => [newAlert, ...prev.slice(0, 9)])
-
-        toast({
-          title: "New Alert",
-          description: `${newAlert.type} detected at ${newAlert.location}`,
-          variant: newAlert.priority === "HIGH" ? "destructive" : "default",
-        })
-      }
     }, 2000)
 
     return () => clearInterval(interval)
-  }, [toast])
-
-  const acknowledgeAlert = useCallback((alertId: string) => {
-    setAlerts((prev) => prev.map((alert) => (alert.id === alertId ? { ...alert, status: "acknowledged" } : alert)))
   }, [])
-
-  const escalateAlert = useCallback(
-    (alertId: string) => {
-      setAlerts((prev) =>
-        prev.map((alert) =>
-          alert.id === alertId ? { ...alert, priority: "HIGH", assignedTo: "Security Team" } : alert,
-        ),
-      )
-      toast({
-        title: "Alert Escalated",
-        description: "Alert has been escalated to security team",
-        variant: "destructive",
-      })
-    },
-    [toast],
-  )
 
   return {
     systemStats,
-    cameras,
     alerts,
+    cameras,
     isConnected,
-    acknowledgeAlert,
-    escalateAlert,
   }
 }

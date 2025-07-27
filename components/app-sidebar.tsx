@@ -1,6 +1,6 @@
 "use client"
 
-import { Monitor, AlertTriangle, Archive, Camera, Settings, Wifi, Activity } from "lucide-react"
+import { Monitor, AlertTriangle, Archive, Camera, Settings, Wifi, BarChart3 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
   Sidebar,
@@ -22,52 +22,58 @@ interface AppSidebarProps {
 const menuItems = [
   {
     id: "live-monitor",
-    title: "Live Monitor",
+    title: "Live Cameras",
+    description: "Watch all cameras",
     icon: Monitor,
     disabled: false,
     color: "text-blue-400",
   },
   {
     id: "alert-center",
-    title: "Alert Center",
+    title: "Alerts",
+    description: "View security alerts",
     icon: AlertTriangle,
     disabled: false,
     color: "text-red-400",
   },
   {
     id: "evidence-bank",
-    title: "Evidence Bank",
+    title: "Saved Videos",
+    description: "Download recordings",
     icon: Archive,
     disabled: false,
     color: "text-purple-400",
   },
   {
     id: "camera-health",
-    title: "Camera Health",
+    title: "Camera Status",
+    description: "Check camera health",
     icon: Camera,
     disabled: false,
     color: "text-green-400",
   },
   {
     id: "analytics",
-    title: "Analytics",
-    icon: Activity,
+    title: "Reports",
+    description: "View statistics",
+    icon: BarChart3,
     disabled: false,
     color: "text-yellow-400",
   },
   {
     id: "ai-tuning",
-    title: "AI Tuning",
+    title: "AI Settings",
+    description: "Coming soon",
     icon: Settings,
     disabled: true,
     color: "text-gray-500",
   },
 ]
 
-export function AppSidebar({ activeTab, setActiveTab, alertCount = 5 }: AppSidebarProps) {
+export function AppSidebar({ activeTab, setActiveTab, alertCount = 0 }: AppSidebarProps) {
   return (
-    <Sidebar className="border-r border-gray-700/50">
-      <SidebarContent className="glass-effect">
+    <Sidebar className="border-r border-gray-700">
+      <SidebarContent className="bg-gray-800">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2 p-4">
@@ -78,31 +84,26 @@ export function AppSidebar({ activeTab, setActiveTab, alertCount = 5 }: AppSideb
                     isActive={activeTab === item.id}
                     disabled={item.disabled}
                     className={`
-                      relative overflow-hidden transition-all duration-300 rounded-xl p-4 h-auto
+                      relative transition-all duration-200 rounded-lg p-4 h-auto
                       ${
                         activeTab === item.id
-                          ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border border-blue-500/30 shadow-lg"
-                          : "text-gray-300 hover:text-white hover:bg-gray-800/50"
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "text-gray-300 hover:text-white hover:bg-gray-700"
                       }
-                      ${item.disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-105"}
+                      ${item.disabled ? "opacity-50 cursor-not-allowed" : ""}
                     `}
-                    title={item.disabled ? "Coming soon..." : undefined}
+                    title={item.disabled ? item.description : undefined}
                   >
                     <div className="flex items-center gap-3 w-full">
-                      <item.icon className={`h-5 w-5 ${activeTab === item.id ? "text-blue-400" : item.color}`} />
-                      <span className="font-medium">{item.title}</span>
+                      <item.icon className={`h-5 w-5 ${activeTab === item.id ? "text-white" : item.color}`} />
+                      <div className="flex-1 text-left">
+                        <div className="font-medium">{item.title}</div>
+                        <div className="text-xs opacity-75">{item.description}</div>
+                      </div>
                       {item.id === "alert-center" && alertCount > 0 && (
-                        <Badge className="ml-auto bg-red-600 text-white text-xs px-1 min-w-[1.25rem] h-5">
-                          {alertCount}
-                        </Badge>
-                      )}
-                      {activeTab === item.id && (
-                        <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        <Badge className="bg-red-600 text-white text-xs px-2 py-1">{alertCount}</Badge>
                       )}
                     </div>
-                    {activeTab === item.id && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent rounded-xl"></div>
-                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -111,25 +112,15 @@ export function AppSidebar({ activeTab, setActiveTab, alertCount = 5 }: AppSideb
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="glass-effect border-t border-gray-700/50 p-6">
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 text-sm">
-            <div className="flex items-center gap-2 text-green-400">
-              <Wifi className="h-4 w-4 animate-pulse" />
-              <span className="font-medium">System Online</span>
-            </div>
+      <SidebarFooter className="bg-gray-800 border-t border-gray-700 p-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm">
+            <Wifi className="h-4 w-4 text-green-400" />
+            <span className="text-green-400 font-medium">System Online</span>
           </div>
-
-          <div className="flex items-center gap-3 text-xs text-gray-400">
-            <Activity className="h-3 w-3" />
-            <span>Last check: 2s ago</span>
-          </div>
-
-          <div className="w-full bg-gray-700 rounded-full h-1">
-            <div
-              className="bg-gradient-to-r from-green-500 to-blue-500 h-1 rounded-full animate-pulse"
-              style={{ width: "85%" }}
-            ></div>
+          <div className="text-xs text-gray-400">Last check: 2 seconds ago</div>
+          <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="bg-green-500 h-2 rounded-full" style={{ width: "85%" }}></div>
           </div>
         </div>
       </SidebarFooter>

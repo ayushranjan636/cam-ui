@@ -38,13 +38,13 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 text-white">
+    <div className="min-h-screen bg-gray-900 text-white">
       <SidebarProvider defaultOpen={true}>
         <div className="flex h-screen">
           <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} alertCount={alerts.length} />
           <div className="flex-1 flex flex-col">
             <TopNavbar systemStats={systemStats} isConnected={isConnected} />
-            <main className="flex-1 overflow-auto p-6">{renderContent()}</main>
+            <main className="flex-1 overflow-auto p-4">{renderContent()}</main>
           </div>
         </div>
         <NotificationSystem />

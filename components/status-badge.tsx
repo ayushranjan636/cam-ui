@@ -1,22 +1,38 @@
+"use client"
+
+import { Badge } from "@/components/ui/badge"
+
 interface StatusBadgeProps {
   status: "live" | "warning" | "offline"
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  const getStatusConfig = (status: string) => {
+  const getStatusConfig = () => {
     switch (status) {
       case "live":
-        return { color: "bg-green-600", text: "LIVE" }
+        return {
+          text: "LIVE",
+          className: "bg-green-600 text-white border-green-600",
+        }
       case "warning":
-        return { color: "bg-yellow-600", text: "WARNING" }
+        return {
+          text: "WARNING",
+          className: "bg-yellow-600 text-white border-yellow-600",
+        }
       case "offline":
-        return { color: "bg-red-600", text: "OFFLINE" }
+        return {
+          text: "OFFLINE",
+          className: "bg-red-600 text-white border-red-600",
+        }
       default:
-        return { color: "bg-gray-600", text: "UNKNOWN" }
+        return {
+          text: "UNKNOWN",
+          className: "bg-gray-600 text-white border-gray-600",
+        }
     }
   }
 
-  const config = getStatusConfig(status)
+  const config = getStatusConfig()
 
-  return <span className={`${config.color} text-white px-2 py-1 rounded text-xs font-semibold`}>{config.text}</span>
+  return <Badge className={`${config.className} text-xs font-semibold px-2 py-1`}>{config.text}</Badge>
 }

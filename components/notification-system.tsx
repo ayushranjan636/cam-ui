@@ -22,17 +22,23 @@ export function NotificationSystem() {
     // Simulate incoming notifications
     const interval = setInterval(() => {
       if (Math.random() < 0.1) {
+        const messages = [
+          "New person detected at main entrance",
+          "Camera CAM_HALL_03 back online",
+          "Motion detected in parking lot",
+          "System health check completed",
+        ]
         const newNotification: Notification = {
           id: Date.now().toString(),
           type: Math.random() < 0.3 ? "alert" : Math.random() < 0.6 ? "info" : "success",
           title: "System Update",
-          message: "New detection event recorded",
+          message: messages[Math.floor(Math.random() * messages.length)],
           timestamp: new Date(),
           read: false,
         }
         setNotifications((prev) => [newNotification, ...prev.slice(0, 9)])
       }
-    }, 10000)
+    }, 15000)
 
     return () => clearInterval(interval)
   }, [])
@@ -82,7 +88,7 @@ export function NotificationSystem() {
           </div>
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-400">No notifications</div>
+              <div className="p-4 text-center text-gray-400">No new notifications</div>
             ) : (
               notifications.map((notification) => (
                 <div
